@@ -11,15 +11,17 @@ plugins {
 
 group = "com.willfp"
 version = findProperty("version")!!
-val libreforgeVersion = findProperty("libreforge-version")
+// 修复：添加非空断言或默认值
+val libreforgeVersion = findProperty("libreforge-version") ?: "未知版本"
 
 base {
     archivesName.set(project.name)
 }
 
 dependencies {
-    project(":eco-core").dependencyProject.subprojects {
-        implementation(this)
+    // 修复：移除不存在的 dependencyProject 引用
+    project(":eco-core").subprojects {
+        implementation(project(this.path))
     }
 }
 
@@ -74,6 +76,7 @@ allprojects {
             filesMatching(listOf("**plugin.yml", "**eco.yml")) {
                 expand(
                     "version" to project.version,
+                    // 修复：确保使用非空值
                     "libreforgeVersion" to libreforgeVersion,
                     "pluginName" to rootProject.name
                 )
