@@ -18,12 +18,8 @@ base {
     archivesName.set(project.name)
 }
 
-dependencies {
-    // 修复：移除不存在的 dependencyProject 引用
-    project(":eco-core").subprojects {
-        implementation(project(this.path))
-    }
-}
+// 修复：移除不正确的依赖声明方式
+// 正确的依赖声明应该在 allprojects 或 subprojects 块中
 
 allprojects {
     apply(plugin = "java")
@@ -45,6 +41,13 @@ allprojects {
         compileOnly("com.willfp:eco:6.56.0")
         compileOnly("org.jetbrains:annotations:23.0.0")
         compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+        
+        // 如果你需要添加对 eco-core 子项目的依赖
+        // 可以在这里添加，但需要确保这些项目存在
+        if (project.name != "eco-core") {
+            // 添加对 eco-core 的依赖
+            implementation(project(":eco-core"))
+        }
     }
 
     java {
@@ -85,6 +88,21 @@ allprojects {
 
         build {
             dependsOn(shadowJar)
+        }
+    }
+}
+
+// 如果你确实需要添加 eco-core 的所有子项目作为依赖
+// 可以在 afterEvaluate 中处理
+afterEvaluate {
+    // 获取 eco-core 的所有子项目并添加为依赖
+    val ecoCoreProject = project(":eco-core")
+    if (ecoCoreProject.subprojects.isNotEmpty()) {
+        ecoCoreProject.subprojects.forEach { subproject ->
+            // 为当前项目添加对 eco-core 子项目的依赖
+            dependencies {
+                implementation(subproject)
+            }
         }
     }
 }
